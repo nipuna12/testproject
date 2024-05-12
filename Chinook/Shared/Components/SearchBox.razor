@@ -1,0 +1,14 @@
+﻿<input type="text" @bind="SearchQuery" @oninput="OnSearchInput" placeholder="Search" />
+
+@code {
+    private string SearchQuery { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnSearch { get; set; }
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        SearchQuery = e.Value.ToString();
+        await OnSearch.InvokeAsync(SearchQuery);
+    }
+}

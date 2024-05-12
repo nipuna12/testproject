@@ -22,7 +22,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var artist in Artists)
+            @foreach (var artist in FilteredArtistsList)
             {
                 <tr>
                     <td><a href="Artist/@artist.ArtistId">@artist.Name</a></td>
@@ -37,22 +37,31 @@ else
     private List<Artist> Artists;
     [Inject] IDbContextFactory<ChinookContext> DbFactory { get; set; }
 
+    private List<Artist> FilteredArtistsList { get; set; } = new List<Artist>();
+
     protected override async Task OnInitializedAsync() {
         await InvokeAsync(StateHasChanged);
         Artists = await GetArtists();
+        FilteredArtistsList = Artists;
     }
 
     public async Task<List<Artist>> GetArtists()
     {   
         var dbContext = await DbFactory.CreateDbContextAsync();
         var users = dbContext.Users.Include(a => a.UserPlaylists).ToList();
-        
-        return dbContext.Artists.ToList();
+
+        var artistsList = dbContext.Artists.Include(x => x.Albums).ToList();
+        return artistsList;
     }
 
     public async Task<List<Album>> GetAlbumsForArtist(int artistId)
     {
         var dbContext = await DbFactory.CreateDbContextAsync();
         return dbContext.Albums.Where(a => a.ArtistId == artistId).ToList();
+    }
+
+    private void HandleSearch(string query)
+    {
+        FilteredArtistsList = Artists.Where(x => x.Name.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
     }
 }
