@@ -65,7 +65,7 @@ namespace Chinook.Services.Implementations
             var dbContext = _unitOfWork.GetDatabaseContext();
             var playlist = new Chinook.Models.Playlist
             {
-                PlaylistId = dbContext.Playlists.AsNoTracking().Max(x => x.PlaylistId) + 1,
+                PlaylistId = dbContext.Playlists.Any() ? dbContext.Playlists.AsNoTracking().Max(x => x.PlaylistId) + 1 : 1,
                 Name = newPlaylistName
             };
             dbContext.Playlists.Add(playlist);

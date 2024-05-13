@@ -1,8 +1,9 @@
 ﻿@using Chinook.Pages
 @using Chinook.Services.Interfaces
 @using System.Security.Claims
-@inject IPlaylistService _playlistService;
 
+@inject IPlaylistService _playlistService;
+@inject AppState _appState;
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -21,18 +22,17 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            @if (userPlaylists.Count >= 0)
+            @if(userPlaylists is not null)
             {
-                <ArtistPage playlistAdded="HandlePlaylistEvent" />
+                <ArtistPage />
+
+                foreach (var playlist in userPlaylists)
+                {
+                    <NavLink class="nav-link">
+                        <i class="bi bi-music-note-list me-3" style="font-size: 1.25em"></i>@playlist.Name
+                    </NavLink>
+                }
             }
-
-            @foreach (var playlist in userPlaylists)
-            {
-                <NavLink class="nav-link">
-                    <i class="bi bi-music-note-list me-3" style="font-size: 1.25em"></i>@playlist.Name
-                </NavLink>
-            }            
-
         </div>
 
     </nav>
@@ -43,7 +43,7 @@
     private string CurrentUserId;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-    private List<ClientModels.Playlist> userPlaylists = new List<ClientModels.Playlist>();
+    private List<ClientModels.Playlist> userPlaylists;// = new List<ClientModels.Playlist>();
     [CascadingParameter] private Task<AuthenticationState> authenticationState { get; set; }
 
     private void ToggleNavMenu()
@@ -54,6 +54,7 @@
     protected override async Task OnInitializedAsync()
     {
         await InvokeAsync(StateHasChanged);
+        _appState.OnChange += HandlePlaylistEvent;
         CurrentUserId = await GetUserId();
         userPlaylists = await _playlistService.GetPlayListByUserIdAsync(CurrentUserId);
     }
@@ -65,8 +66,9 @@
         return userId;
     }
 
-    private async Task HandlePlaylistEvent(string message)
+    private async void HandlePlaylistEvent()
     {
         userPlaylists = await _playlistService.GetPlayListByUserIdAsync(CurrentUserId);
+        this.StateHasChanged();
     }
 }

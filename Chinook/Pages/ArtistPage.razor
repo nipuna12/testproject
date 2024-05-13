@@ -8,6 +8,7 @@
 @using System.Security.Claims;
 @inject IPlaylistService _playlistService;
 @inject IUnitOfWork _unitOfWork;
+@inject AppState _appState;
 
 @if (!string.IsNullOrWhiteSpace(InfoMessage))
 {
@@ -91,7 +92,6 @@ else
 
 @code {
     [Parameter] public long ArtistId { get; set; }
-    [Parameter] public EventCallback<string> playlistAdded { get; set; }
 
     [CascadingParameter] private Task<AuthenticationState> authenticationState { get; set; }
     [Inject] IDbContextFactory<ChinookContext> DbFactory { get; set; }    
@@ -137,13 +137,15 @@ else
 
     private async void FavoriteTrack(long trackId)
     {
+        var isNewPlayListAdded = false;
         var track = Tracks.FirstOrDefault(t => t.TrackId == trackId);
 
         var playlist = await _playlistService.GetPlaylistByNameAsync("My favorite tracks");
         if (playlist is null)
         {
             // Create the playlist if it doesn't exist
-            playlist = await _playlistService.CreateNewPlayListAsync("My favorite tracks");            
+            playlist = await _playlistService.CreateNewPlayListAsync("My favorite tracks");
+            isNewPlayListAdded = true;
         }
 
         await _playlistService.CreateNewUserPlayListAsync(CurrentUserId, playlist.PlaylistId);
@@ -154,6 +156,11 @@ else
         await _unitOfWork.GetDatabaseContext().SaveChangesAsync();
 
         Tracks = await _playlistService.GetPlaylistTracksByArtistAsync(ArtistId, CurrentUserId);
+
+        if (isNewPlayListAdded)
+        {
+            _appState.UpdatePlaylistStore();
+        }
 
         InfoMessage = $"Track {track.ArtistName} - {track.AlbumTitle} - {track.TrackName} added to playlist Favorites.";
     }
@@ -230,11 +237,6 @@ else
 
         await _unitOfWork.GetDatabaseContext().SaveChangesAsync();
 
-        if (isNewPlayListAdded)
-        {
-            await playlistAdded.InvokeAsync("New playlist added");
-        }
-
         // Clear the new playlist name after adding the track
         NewPlaylistName = "";
 
@@ -243,6 +245,11 @@ else
         PlaylistDialog.Close();
         UserPlaylists = await _playlistService.GetPlayListByUserIdAsync(CurrentUserId);
         Tracks = await _playlistService.GetPlaylistTracksByArtistAsync(ArtistId, CurrentUserId);
+
+        if (isNewPlayListAdded)
+        {
+            _appState.UpdatePlaylistStore();
+        }
     }
 
     private void CloseInfoMessage()

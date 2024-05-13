@@ -21,6 +21,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ChinookUser>>();
 builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
 builder.Services.AddScoped<IPlaylistService, PlayListService>();
+builder.Services.AddScoped<AppState>();
 
 var app = builder.Build();
 
