@@ -28,8 +28,9 @@
 
                 foreach (var playlist in userPlaylists)
                 {
-                    <NavLink class="nav-link">
-                        <i class="bi bi-music-note-list me-3" style="font-size: 1.25em"></i>@playlist.Name
+                    var url = $"playlist/{playlist.PlayListId}";
+                    <NavLink class="nav-link" href="@url" target="_blank">
+                        <i class="bi bi-music-note-list me-3" style="font-size: 1.25em"></i>@playlist.Name 
                     </NavLink>
                 }
             }
