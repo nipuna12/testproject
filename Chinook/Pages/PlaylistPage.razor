@@ -157,4 +157,9 @@ else
         InfoMessage = "";
     }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        await OnInitializedAsync();
+    }
+
 }
