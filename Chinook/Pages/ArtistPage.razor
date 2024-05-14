@@ -148,6 +148,19 @@ else
             isNewPlayListAdded = true;
         }
 
+        if (!isNewPlayListAdded)
+        {
+            var userPlaylist = _unitOfWork.GetDatabaseContext().UserPlaylists
+                                       .FirstOrDefault(up =>
+                                           up.UserId == CurrentUserId &&
+                                           up.PlaylistId == playlist.PlaylistId
+                                       );
+            if (userPlaylist is null)
+            {
+                isNewPlayListAdded = true;
+            }
+        }        
+
         await _playlistService.CreateNewUserPlayListAsync(CurrentUserId, playlist.PlaylistId);
 
         // Add the track to the playlist using the association table
