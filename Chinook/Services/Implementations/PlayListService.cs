@@ -45,7 +45,20 @@ namespace Chinook.Services.Implementations
 
         public async Task<List<ClientModels.Playlist>> GetPlayListByUserIdAsync(string userId)
         {
+            if(userId is null)
+            {
+                return new List<ClientModels.Playlist>();
+            }
+
             var dbContext = _unitOfWork.GetDatabaseContext();
+
+            var playlist = await GetPlaylistByNameAsync("My favorite tracks");
+            if (playlist is not null)
+            {
+                // Create the user playlist if it doesn't exist
+                await CreateNewUserPlayListAsync(userId, playlist.PlaylistId);
+                await dbContext.SaveChangesAsync();
+            }
 
             var userPlaylists = await dbContext.Playlists
                 .Include(x => x.UserPlaylists)
