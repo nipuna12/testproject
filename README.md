@@ -1,18 +1,26 @@
 # Chinook
 
-This application is unfinished. Please complete below tasks. Spend max 2 hours.
-We would like to have a short written explanation of the changes you made.
+# Playlist Management System
 
-1. Move data retrieval methods to separate class / classes (use dependency injection)
-2. Favorite / unfavorite tracks. An automatic playlist should be created named "My favorite tracks"
-3. Search for artist name
+## Overview:
+This project implements a playlist management system using Blazor for the front-end and Entity Framework Core for data access. The system allows users to add tracks to playlists, create new playlists, and manage their favorite tracks.
 
-Optional:
-4. The user's playlists should be listed in the left navbar. If a playlist is added (or modified), this should reflect in the left navbar (NavMenu.razor). Preferrably, this list should be refreshed without a full page reload. (suggestion: you can use Event, Reactive.NET, SectionOutlet, or any other method you prefer)
-5. Add tracks to a playlist (existing or new one). The dialog is already created but not yet finished.
+## Key Components
 
-When creating a user account, you will see this:
-"This app does not currently have a real email sender registered, see these docs for how to configure a real email sender. Normally this would be emailed: Click here to confirm your account."
-After you click 'Click here to confirm your account' you should be able to login.
+### Service Layer
 
-Please send us a zip file with the modified solution when you are done. You can also upload it to your own GitHub account and send us the link.
+PlaylistService: This service provides methods to interact with the database, such as retrieving playlists, creating new playlists, and adding tracks to playlists.
+
+
+### Blazor Page
+
+ArtistPage.razor
+This page is focused on displaying artist information and tracks. It allows users to add tracks to their favorite playlists directly from the artist page.
+
+PlalistPage.razor: TODO..............
+
+The list of user playlists is dynamically updated after any changes, ensuring that the UI reflects the current state of the data.
+Two-way data binding ensures that the form controls are always in sync with the model.
+
+## Summary
+This approach separates concerns effectively, with the service layer focused on data access and business logic, and the Blazor page handling user interactions and error display. This results in clean, maintainable code and a responsive user interface.
