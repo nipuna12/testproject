@@ -13,7 +13,22 @@
         </div>
 
         <article class="content px-4">
-            @Body
+            <ErrorBoundary @ref="errorBoundary">
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent>
+                    <h2>There was an error</h2> @* can put this error message in separate component *@
+                </ErrorContent>
+            </ErrorBoundary>
         </article>
     </main>
 </div>
+
+@code {
+    private ErrorBoundary? errorBoundary;
+    protected override void OnParametersSet()
+    {
+        errorBoundary?.Recover();
+    }
+}
