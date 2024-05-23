@@ -9,6 +9,7 @@ namespace Chinook.Models
         {
             InvoiceLines = new HashSet<InvoiceLine>();
             Playlists = new HashSet<Playlist>();
+            UserPlaylistTracks = new HashSet<UserPlaylistTrack>();
         }
 
         public long TrackId { get; set; }
@@ -27,5 +28,6 @@ namespace Chinook.Models
         public virtual ICollection<InvoiceLine> InvoiceLines { get; set; }
 
         public virtual ICollection<Playlist> Playlists { get; set; }
+        public virtual ICollection<UserPlaylistTrack> UserPlaylistTracks { get; set; }
     }
 }

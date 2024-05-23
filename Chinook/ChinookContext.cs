@@ -29,6 +29,7 @@ public partial class ChinookContext : IdentityDbContext<ChinookUser>
     public virtual DbSet<Playlist> Playlists { get; set; } = null!;
     public virtual DbSet<Track> Tracks { get; set; } = null!;
     public virtual DbSet<UserPlaylist> UserPlaylists { get; set; } = null!;
+    public virtual DbSet<UserPlaylistTrack> UserPlaylistTracks { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -283,6 +284,22 @@ public partial class ChinookContext : IdentityDbContext<ChinookUser>
             entity.HasOne(up => up.Playlist)
                 .WithMany(u => u.UserPlaylists)
                 .HasForeignKey(up => up.PlaylistId);
+        });
+
+        modelBuilder.Entity<UserPlaylistTrack>(entity =>
+        {
+            entity.HasKey(upt => upt.Id);
+
+            entity.ToTable("UserPlaylistTrack");
+
+            entity.HasOne(upt => upt.UserPlaylist)
+                .WithMany(up => up.UserPlaylistTracks)
+                .HasForeignKey(upt => new { upt.UserId, upt.PlaylistId });
+
+            entity.HasOne(upt => upt.Track)
+               .WithMany(t => t.UserPlaylistTracks)
+               .HasForeignKey(upt => upt.TrackId);
+
         });
 
         OnModelCreatingPartial(modelBuilder);

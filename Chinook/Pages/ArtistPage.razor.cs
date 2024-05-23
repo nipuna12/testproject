@@ -5,6 +5,7 @@ using Chinook.Shared.Components;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
+using NuGet.DependencyResolver;
 using System.Security.Claims;
 
 namespace Chinook.Pages
@@ -43,12 +44,15 @@ namespace Chinook.Pages
 
             Tracks = DbContext.Tracks.Where(a => a.Album.ArtistId == ArtistId)
                 .Include(a => a.Album)
+                .Include(x=>x.UserPlaylistTracks)
+                .ThenInclude(x=>x.UserPlaylist)
+                .ThenInclude(x=>x.Playlist)
                 .Select(t => new PlaylistTrack()
                 {
                     AlbumTitle = (t.Album == null ? "-" : t.Album.Title),
                     TrackId = t.TrackId,
                     TrackName = t.Name,
-                    IsFavorite = t.Playlists.Where(p => p.UserPlaylists.Any(up => up.UserId == CurrentUserId && up.Playlist.Name == "My favorite tracks")).Any()
+                    IsFavorite = t.UserPlaylistTracks.Any(x=>x.TrackId == t.TrackId && x.UserId == CurrentUserId && x.UserPlaylist.Playlist.Name.Equals("My favorite tracks"))
                 })
                 .ToList();
         }
@@ -89,7 +93,7 @@ namespace Chinook.Pages
             await _playlistService.CreateNewUserPlayListAsync(CurrentUserId, playlist.PlaylistId);
 
             // Add the track to the playlist using the association table
-            await _playlistService.CreateNewPlaylistTrackAsync(playlist.PlaylistId, trackId);
+            await _playlistService.CreateNewUserPlaylistTrackAsync(playlist.PlaylistId, trackId, CurrentUserId);
 
             await _unitOfWork.GetDatabaseContext().SaveChangesAsync();
 
@@ -110,7 +114,7 @@ namespace Chinook.Pages
             var playlist = await _playlistService.GetPlaylistByNameAsync("My favorite tracks");
             if (playlist is not null)
             {
-                await _playlistService.DeletePlaylistTrackAsync(playlist.PlaylistId, trackId);
+                await _playlistService.DeleteUserPlaylistTrackAsync(playlist.PlaylistId, trackId, CurrentUserId);
                 await _unitOfWork.GetDatabaseContext().SaveChangesAsync();
             }
 
@@ -174,8 +178,10 @@ namespace Chinook.Pages
                 }
             }
 
-            var existingPlaylistTrack = await _unitOfWork.GetDatabaseContext().Set<Dictionary<string, object>>("PlaylistTrack")
-                        .FirstOrDefaultAsync(pt => pt["PlaylistId"].Equals(playlist.PlaylistId) && pt["TrackId"].Equals(SelectedTrack.TrackId));
+            var existingPlaylistTrack = await _unitOfWork.GetDatabaseContext().UserPlaylistTracks
+                                                .FirstOrDefaultAsync(x => x.UserId == CurrentUserId 
+                                                && x.TrackId == SelectedTrack.TrackId
+                                                && x.PlaylistId == playlist.PlaylistId);
 
             if (existingPlaylistTrack is not null)
             {
@@ -184,7 +190,7 @@ namespace Chinook.Pages
             }
 
             // Add the track to the playlist using the association table
-            await _playlistService.CreateNewPlaylistTrackAsync(playlist.PlaylistId, SelectedTrack.TrackId);
+            await _playlistService.CreateNewUserPlaylistTrackAsync(playlist.PlaylistId, SelectedTrack.TrackId, CurrentUserId);
 
             await _unitOfWork.GetDatabaseContext().SaveChangesAsync();
 

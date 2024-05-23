@@ -11,7 +11,9 @@ namespace Chinook.Services.Interfaces
         Task<Chinook.Models.Playlist> CreateNewPlayListAsync(string newPlaylistName);
         Task CreateNewUserPlayListAsync(string currentUserId, long playlistId);
         Task CreateNewPlaylistTrackAsync(long playlistId, long trackId);
+        Task CreateNewUserPlaylistTrackAsync(long playlistId, long trackId, string userId);
         Task DeletePlaylistTrackAsync(long playlistId, long trackId);
+        Task DeleteUserPlaylistTrackAsync(long playlistId, long trackId, string userId);
         Task<ClientModels.Playlist> GetPlaylistTracksByPlaylistIdAsync(long playlistId, string userId);
     }
 }
